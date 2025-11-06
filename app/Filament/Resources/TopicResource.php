@@ -4,9 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TopicResource\Pages;
 use App\Filament\Resources\TopicResource\RelationManagers;
+use App\Jobs\GenerateExercises;
 use App\Models\Topic;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -71,7 +73,55 @@ class TopicResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('generateExercises')
+                    ->label('Generate Exercises')
+                    ->icon('heroicon-o-academic-cap')
+                    ->color('success')
+                    ->form([
+                        Forms\Components\Select::make('type')
+                            ->label('Exercise Type')
+                            ->options([
+                                'multiple_choice' => 'Multiple Choice',
+                                'true_false' => 'True/False',
+                                'short_answer' => 'Short Answer',
+                                'essay' => 'Essay',
+                                'problem_solving' => 'Problem Solving',
+                            ])
+                            ->required()
+                            ->default('multiple_choice'),
+                        Forms\Components\Select::make('difficulty')
+                            ->options([
+                                'easy' => 'Easy',
+                                'medium' => 'Medium',
+                                'hard' => 'Hard',
+                            ])
+                            ->required()
+                            ->default('medium'),
+                        Forms\Components\TextInput::make('count')
+                            ->label('Number of Exercises')
+                            ->numeric()
+                            ->minValue(1)
+                            ->maxValue(20)
+                            ->default(5)
+                            ->required(),
+                    ])
+                    ->action(function (Topic $record, array $data) {
+                        GenerateExercises::dispatch(
+                            topic: $record,
+                            type: $data['type'],
+                            difficulty: $data['difficulty'],
+                            count: $data['count']
+                        );
+
+                        Notification::make()
+                            ->title('Exercise Generation Started')
+                            ->success()
+                            ->body("Generating {$data['count']} {$data['difficulty']} exercises for topic: {$record->name}")
+                            ->send();
+                    }),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
