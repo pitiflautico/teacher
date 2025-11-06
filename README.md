@@ -1,59 +1,310 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📘 Teacher Platform - Plataforma Educativa Inteligente
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Una plataforma educativa avanzada desarrollada con Laravel, Filament y tecnologías de IA para ayudar a estudiantes a organizar, analizar y estudiar su material académico de forma inteligente.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ✨ Características Implementadas
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### ETAPA 1: Fundación del Proyecto ✅
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Laravel 11** - Framework PHP moderno y robusto
+- **Filament Admin Panel v3** - Panel de administración completo y personalizable
+- **Base de datos MySQL/MariaDB** - Almacenamiento relacional optimizado
+- **Sistema de autenticación** - Login seguro y gestión de sesiones
+- **Roles y permisos** (Spatie Permission):
+  - **Admin**: Acceso completo a todas las funcionalidades
+  - **Estudiante**: Acceso limitado a sus propios contenidos
+- **Tema personalizado**:
+  - Color principal verde (#10B981)
+  - Modo oscuro habilitado
+  - Interfaz limpia y enfocada en el bienestar visual
 
-## Learning Laravel
+### ETAPA 2: Gestión de Contenido ✅
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+#### Modelos y Estructura de Base de Datos
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**1. Asignaturas (Subjects)**
+- Organización de materias por estudiante
+- Personalización con colores e íconos
+- Soft deletes para recuperación de datos
 
-## Laravel Sponsors
+**2. Temas (Topics)**
+- Organización jerárquica dentro de cada asignatura
+- Sistema de orden personalizable
+- Seguimiento de progreso (completado/pendiente)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**3. Material (Materials)**
+- Soporte para múltiples tipos: documentos, imágenes, PDFs, enlaces, notas
+- Sistema de almacenamiento de archivos
+- Campos preparados para OCR e IA:
+  - `extracted_text`: Texto extraído por OCR
+  - `ai_metadata`: Metadata generada por IA (tags, clasificaciones)
+  - `is_processed`: Estado de procesamiento
+- Relacionado con asignaturas y temas
 
-### Premium Partners
+#### Recursos Filament
+- CRUD completo para Asignaturas
+- CRUD completo para Temas
+- CRUD completo para Material
+- Interfaz administrativa intuitiva
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+## 🚀 Instalación y Configuración
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Requisitos Previos
 
-## Code of Conduct
+- PHP 8.2 o superior
+- Composer
+- MySQL 5.7+ o MariaDB 10.3+
+- Node.js y NPM (para assets)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Pasos de Instalación
 
-## Security Vulnerabilities
+1. **Clonar el repositorio**
+```bash
+git clone https://github.com/pitiflautico/teacher.git
+cd teacher
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+2. **Instalar dependencias**
+```bash
+composer install
+npm install
+```
 
-## License
+3. **Configurar entorno**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+4. **Configurar base de datos**
+
+Edita el archivo `.env`:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=teacher_platform
+DB_USERNAME=root
+DB_PASSWORD=tu_password
+```
+
+5. **Ejecutar migraciones y seeders**
+```bash
+php artisan migrate --seed
+```
+
+6. **Generar assets**
+```bash
+npm run build
+```
+
+7. **Iniciar servidor**
+```bash
+php artisan serve
+```
+
+Accede al panel admin en: **http://localhost:8000/admin**
+
+---
+
+## 👤 Usuarios Demo
+
+Usuarios creados automáticamente por los seeders:
+
+### Administrador
+- **Email**: admin@teacher.com
+- **Password**: admin123
+- **Rol**: Admin
+- **Permisos**: Acceso completo
+
+### Estudiante
+- **Email**: estudiante@teacher.com
+- **Password**: estudiante123
+- **Rol**: Estudiante
+- **Permisos**: Gestión de su propio contenido
+
+---
+
+## 📂 Estructura del Proyecto
+
+```
+teacher/
+├── app/
+│   ├── Filament/
+│   │   └── Resources/         # Recursos CRUD de Filament
+│   │       ├── MaterialResource.php
+│   │       ├── SubjectResource.php
+│   │       └── TopicResource.php
+│   ├── Models/
+│   │   ├── Material.php       # Modelo de Material
+│   │   ├── Subject.php        # Modelo de Asignatura
+│   │   ├── Topic.php          # Modelo de Tema
+│   │   └── User.php           # Modelo de Usuario
+│   └── Providers/
+│       └── Filament/
+│           └── AdminPanelProvider.php
+├── database/
+│   ├── migrations/            # Migraciones de base de datos
+│   └── seeders/
+│       ├── RoleSeeder.php     # Roles y permisos
+│       └── AdminUserSeeder.php # Usuarios demo
+└── config/
+    └── permission.php         # Configuración de permisos
+```
+
+---
+
+## 🎯 Próximas Etapas
+
+### ETAPA 3: Procesamiento con IA (Próximamente)
+- [ ] Integración con OCR (Tesseract/AWS Textract)
+- [ ] Extracción automática de texto de imágenes
+- [ ] Sistema de colas para procesamiento asíncrono
+- [ ] Capa de abstracción para proveedores de IA
+- [ ] Gestión de tokens IA
+
+### ETAPA 4: Generación de Ejercicios
+- [ ] Conexión con APIs de IA (OpenAI, Replicate, Mistral)
+- [ ] Generación de ejercicios tipo test
+- [ ] Generación de ejercicios de desarrollo
+- [ ] Renderizado de fórmulas matemáticas (KaTeX)
+- [ ] Adaptación de dificultad según rendimiento
+
+### ETAPA 5: Calendario y Planificación
+- [ ] Integración con Google Calendar
+- [ ] Timeline de estudio
+- [ ] Recordatorios inteligentes
+- [ ] Notificaciones push/email
+
+### ETAPA 6: Analytics y Feedback
+- [ ] Dashboard de progreso
+- [ ] Reportes semanales automáticos
+- [ ] Recomendaciones personalizadas
+- [ ] Sistema de evaluación automática
+
+---
+
+## 🛠️ Tecnologías Utilizadas
+
+- **Backend**: Laravel 11
+- **Admin Panel**: Filament v3
+- **Base de datos**: MySQL/MariaDB
+- **Autenticación**: Laravel Sanctum
+- **Permisos**: Spatie Laravel Permission
+- **Frontend**: Livewire 3, Alpine.js, Tailwind CSS
+- **Icons**: Heroicons
+
+---
+
+## 📊 Esquema de Base de Datos
+
+### Tablas Principales
+
+**users**
+- Sistema de autenticación de Laravel
+- Roles y permisos vía Spatie
+
+**subjects**
+- Asignaturas del estudiante
+- Personalización (colores, íconos)
+
+**topics**
+- Temas organizados por asignatura
+- Sistema de ordenamiento
+
+**materials**
+- Materiales de estudio
+- Soporte para archivos y OCR
+- Metadata de IA
+
+### Relaciones
+```
+User (1) ──► (N) Subjects
+Subject (1) ──► (N) Topics
+Subject (1) ──► (N) Materials
+Topic (1) ──► (N) Materials
+User (1) ──► (N) Materials
+```
+
+---
+
+## 🔐 Sistema de Permisos
+
+### Permisos Disponibles
+
+#### Gestión de Usuarios
+- `view_users`
+- `create_users`
+- `edit_users`
+- `delete_users`
+
+#### Gestión de Asignaturas
+- `view_subjects`
+- `create_subjects`
+- `edit_subjects`
+- `delete_subjects`
+
+#### Gestión de Material
+- `view_materials`
+- `create_materials`
+- `edit_materials`
+- `delete_materials`
+
+#### Gestión de Ejercicios
+- `view_exercises`
+- `create_exercises`
+- `edit_exercises`
+- `delete_exercises`
+- `generate_exercises`
+
+#### Panel de Administración
+- `access_admin_panel`
+
+---
+
+## 📝 Comandos Útiles
+
+```bash
+# Crear nuevo usuario admin
+php artisan make:filament-user
+
+# Limpiar caché
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+
+# Refrescar base de datos
+php artisan migrate:fresh --seed
+
+# Ver rutas
+php artisan route:list
+
+# Ejecutar tests
+php artisan test
+```
+
+---
+
+## 🤝 Contribución
+
+Este proyecto está en desarrollo activo. Las contribuciones son bienvenidas.
+
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo la licencia MIT.
+
+---
+
+## 📧 Contacto
+
+Para preguntas o sugerencias, contacta al equipo de desarrollo.
+
+---
+
+**Desarrollado con ❤️ para mejorar la experiencia educativa**
