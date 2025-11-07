@@ -169,6 +169,67 @@ class ManageAiProviders extends Page implements HasTable
                             ->title(__('Provider updated'))
                             ->body(__('Your AI provider settings have been updated.'))
                     ),
+                Tables\Actions\Action::make('configure_services')
+                    ->label(__('Configure Services'))
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->color('primary')
+                    ->modalHeading(__('Configure Services'))
+                    ->modalDescription(fn ($record) => __('Select which services you want to use with :provider', ['provider' => $record->provider_label]))
+                    ->form(function ($record) {
+                        $availableServices = \App\Models\ProviderService::getAvailableServices($record->provider);
+                        $formFields = [];
+
+                        foreach ($availableServices as $serviceType => $serviceInfo) {
+                            $formFields[] = Forms\Components\Section::make($serviceInfo['label'])
+                                ->description($serviceInfo['description'])
+                                ->schema([
+                                    Forms\Components\Toggle::make("services.{$serviceType}.enabled")
+                                        ->label(__('Enable this service'))
+                                        ->default(function () use ($record, $serviceType) {
+                                            return $record->services()->where('service_type', $serviceType)->exists();
+                                        })
+                                        ->reactive(),
+                                    Forms\Components\Select::make("services.{$serviceType}.model")
+                                        ->label(__('Model'))
+                                        ->options($serviceInfo['models'])
+                                        ->default(function () use ($record, $serviceType, $serviceInfo) {
+                                            $service = $record->services()->where('service_type', $serviceType)->first();
+                                            return $service?->model ?? array_key_first($serviceInfo['models']);
+                                        })
+                                        ->visible(fn ($get) => $get("services.{$serviceType}.enabled"))
+                                        ->required(),
+                                ]);
+                        }
+
+                        return $formFields;
+                    })
+                    ->action(function (UserAiProvider $record, array $data) {
+                        $availableServices = \App\Models\ProviderService::getAvailableServices($record->provider);
+
+                        foreach ($availableServices as $serviceType => $serviceInfo) {
+                            if (isset($data['services'][$serviceType]['enabled'])) {
+                                if ($data['services'][$serviceType]['enabled']) {
+                                    // Create or update service
+                                    $record->services()->updateOrCreate(
+                                        ['service_type' => $serviceType],
+                                        [
+                                            'model' => $data['services'][$serviceType]['model'],
+                                            'is_active' => true,
+                                        ]
+                                    );
+                                } else {
+                                    // Disable service
+                                    $record->services()->where('service_type', $serviceType)->delete();
+                                }
+                            }
+                        }
+
+                        Notification::make()
+                            ->success()
+                            ->title(__('Services configured'))
+                            ->body(__('Your services have been configured successfully.'))
+                            ->send();
+                    }),
                 Tables\Actions\Action::make('reset_usage')
                     ->label(__('Reset Usage'))
                     ->icon('heroicon-o-arrow-path')

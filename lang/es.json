@@ -179,5 +179,10 @@
     "Streak": "Racha",
     "days": "días",
     "Level": "Nivel",
-    "Points": "Puntos"
+    "Points": "Puntos",
+    "Configure Services": "Configurar Servicios",
+    "Select which services you want to use with :provider": "Selecciona qué servicios quieres usar con :provider",
+    "Enable this service": "Habilitar este servicio",
+    "Services configured": "Servicios configurados",
+    "Your services have been configured successfully.": "Tus servicios han sido configurados exitosamente."
 }
