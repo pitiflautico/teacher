@@ -1,8 +1,9 @@
 <x-filament-widgets::widget>
     <div class="space-y-4">
-        <div class="flex items-center gap-3">
-            <div class="flex-shrink-0 w-10 h-10 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center">
-                <x-heroicon-o-bolt class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-6">
+            <div class="flex-shrink-0 w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+                <x-heroicon-o-bolt class="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
                 <h2 class="text-lg font-bold text-gray-900 dark:text-white">
@@ -14,101 +15,87 @@
             </div>
         </div>
 
+        <!-- Actions Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            @foreach($this->getActions() as $action)
-                <a href="{{ $action['url'] }}"
-                   class="group relative p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-{{ $action['color'] }}-500 dark:hover:border-{{ $action['color'] }}-500 transition-all hover:shadow-lg cursor-pointer">
-
-                    <!-- Icon -->
-                    <div class="mb-4">
-                        <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-{{ $action['color'] }}-100 dark:bg-{{ $action['color'] }}-900/30 group-hover:bg-{{ $action['color'] }}-500 transition-all">
-                            @php
-                                $iconColor = "text-{$action['color']}-600 dark:text-{$action['color']}-400 group-hover:text-white";
-                            @endphp
-                            <x-dynamic-component
-                                :component="$action['icon']"
-                                class="w-7 h-7 {{ $iconColor }} transition-colors"
-                            />
-                        </div>
+            <!-- Upload Homework -->
+            <a href="{{ route('filament.admin.pages.upload-homework') }}"
+               class="group relative bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-lg transition-all">
+                <div class="flex flex-col h-full">
+                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple-500 transition-colors">
+                        <x-heroicon-o-cloud-arrow-up class="w-6 h-6 text-purple-600 dark:text-purple-400 group-hover:text-white transition-colors" />
                     </div>
-
-                    <!-- Content -->
-                    <div>
-                        <h3 class="font-bold text-gray-900 dark:text-white mb-1 group-hover:text-{{ $action['color'] }}-600 dark:group-hover:text-{{ $action['color'] }}-400 transition-colors">
-                            {{ $action['label'] }}
-                        </h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">
-                            {{ $action['description'] }}
-                        </p>
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-1">
+                        {{ __('Upload Homework') }}
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">
+                        {{ __('Upload your notes or homework documents') }}
+                    </p>
+                    <div class="mt-3 flex items-center text-purple-600 dark:text-purple-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>{{ __('Start') }}</span>
+                        <x-heroicon-m-arrow-right class="w-4 h-4 ml-1" />
                     </div>
+                </div>
+            </a>
 
-                    <!-- Arrow indicator -->
-                    <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <x-heroicon-m-arrow-right class="w-5 h-5 text-{{ $action['color'] }}-600 dark:text-{{ $action['color'] }}-400" />
+            <!-- Practice Exercises -->
+            <a href="{{ route('filament.admin.resources.exercises.index') }}"
+               class="group relative bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-700 hover:shadow-lg transition-all">
+                <div class="flex flex-col h-full">
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:bg-green-500 transition-colors">
+                        <x-heroicon-o-academic-cap class="w-6 h-6 text-green-600 dark:text-green-400 group-hover:text-white transition-colors" />
                     </div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-1">
+                        {{ __('Practice Exercises') }}
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">
+                        {{ __('Answer questions to test your knowledge') }}
+                    </p>
+                    <div class="mt-3 flex items-center text-green-600 dark:text-green-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>{{ __('Start') }}</span>
+                        <x-heroicon-m-arrow-right class="w-4 h-4 ml-1" />
+                    </div>
+                </div>
+            </a>
 
-                    <!-- Hover effect overlay -->
-                    <div class="absolute inset-0 rounded-xl bg-gradient-to-br from-{{ $action['color'] }}-500/0 to-{{ $action['color'] }}-500/0 group-hover:from-{{ $action['color'] }}-500/5 group-hover:to-{{ $action['color'] }}-500/10 transition-all pointer-events-none"></div>
-                </a>
-            @endforeach
+            <!-- Study Flashcards -->
+            <a href="{{ route('filament.admin.resources.flashcards.index') }}"
+               class="group relative bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-700 hover:shadow-lg transition-all">
+                <div class="flex flex-col h-full">
+                    <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:bg-yellow-500 transition-colors">
+                        <x-heroicon-o-sparkles class="w-6 h-6 text-yellow-600 dark:text-yellow-400 group-hover:text-white transition-colors" />
+                    </div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-1">
+                        {{ __('Study Flashcards') }}
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">
+                        {{ __('Review flashcards with spaced repetition') }}
+                    </p>
+                    <div class="mt-3 flex items-center text-yellow-600 dark:text-yellow-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>{{ __('Start') }}</span>
+                        <x-heroicon-m-arrow-right class="w-4 h-4 ml-1" />
+                    </div>
+                </div>
+            </a>
+
+            <!-- View Progress -->
+            <a href="{{ route('filament.admin.pages.dashboard') }}"
+               class="group relative bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg transition-all">
+                <div class="flex flex-col h-full">
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-500 transition-colors">
+                        <x-heroicon-o-chart-bar class="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:text-white transition-colors" />
+                    </div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-1">
+                        {{ __('View Progress') }}
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">
+                        {{ __('Check your points, badges, and level') }}
+                    </p>
+                    <div class="mt-3 flex items-center text-blue-600 dark:text-blue-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>{{ __('Start') }}</span>
+                        <x-heroicon-m-arrow-right class="w-4 h-4 ml-1" />
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
-
-    <style>
-        /* Dynamic color generation for hover states */
-        @layer components {
-            .hover\:border-primary-500:hover {
-                border-color: rgb(139 92 246);
-            }
-            .hover\:border-success-500:hover {
-                border-color: rgb(34 197 94);
-            }
-            .hover\:border-warning-500:hover {
-                border-color: rgb(251 191 36);
-            }
-            .hover\:border-info-500:hover {
-                border-color: rgb(59 130 246);
-            }
-
-            .bg-primary-100 {
-                background-color: rgb(237 233 254);
-            }
-            .dark .dark\:bg-primary-900\/30 {
-                background-color: rgb(76 29 149 / 0.3);
-            }
-            .group:hover .group-hover\:bg-primary-500 {
-                background-color: rgb(139 92 246);
-            }
-
-            .bg-success-100 {
-                background-color: rgb(220 252 231);
-            }
-            .dark .dark\:bg-success-900\/30 {
-                background-color: rgb(20 83 45 / 0.3);
-            }
-            .group:hover .group-hover\:bg-success-500 {
-                background-color: rgb(34 197 94);
-            }
-
-            .bg-warning-100 {
-                background-color: rgb(254 243 199);
-            }
-            .dark .dark\:bg-warning-900\/30 {
-                background-color: rgb(120 53 15 / 0.3);
-            }
-            .group:hover .group-hover\:bg-warning-500 {
-                background-color: rgb(251 191 36);
-            }
-
-            .bg-info-100 {
-                background-color: rgb(219 234 254);
-            }
-            .dark .dark\:bg-info-900\/30 {
-                background-color: rgb(30 58 138 / 0.3);
-            }
-            .group:hover .group-hover\:bg-info-500 {
-                background-color: rgb(59 130 246);
-            }
-        }
-    </style>
 </x-filament-widgets::widget>

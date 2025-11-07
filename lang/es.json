@@ -184,5 +184,15 @@
     "Select which services you want to use with :provider": "Selecciona qué servicios quieres usar con :provider",
     "Enable this service": "Habilitar este servicio",
     "Services configured": "Servicios configurados",
-    "Your services have been configured successfully.": "Tus servicios han sido configurados exitosamente."
+    "Your services have been configured successfully.": "Tus servicios han sido configurados exitosamente.",
+    "Quick Actions": "Acciones Rápidas",
+    "Get started with your learning": "Comienza con tu aprendizaje",
+    "Upload your notes or homework documents": "Sube tus apuntes o documentos de tarea",
+    "Practice Exercises": "Practicar Ejercicios",
+    "Answer questions to test your knowledge": "Responde preguntas para probar tus conocimientos",
+    "Study Flashcards": "Estudiar Flashcards",
+    "Review flashcards with spaced repetition": "Repasa flashcards con repetición espaciada",
+    "View Progress": "Ver Progreso",
+    "Check your points, badges, and level": "Revisa tus puntos, insignias y nivel",
+    "Start": "Comenzar"
 }
