@@ -3,12 +3,12 @@
         <x-slot name="heading">
             <div class="flex items-center gap-2">
                 <x-heroicon-o-clock class="w-5 h-5 text-gray-500" />
-                <span>Recent Activity</span>
+                <span>{{ __('Recent Activity') }}</span>
             </div>
         </x-slot>
 
         <x-slot name="description">
-            Latest learning activity trends
+            {{ __('Latest learning activity trends') }}
         </x-slot>
 
         <div class="space-y-3">
@@ -74,8 +74,8 @@
             @empty
                 <div class="text-center py-12">
                     <x-heroicon-o-clock class="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p class="text-gray-500 dark:text-gray-400">No recent activity yet</p>
-                    <p class="text-sm text-gray-400 dark:text-gray-500">Start learning to see your progress here</p>
+                    <p class="text-gray-500 dark:text-gray-400">{{ __('No recent activity yet') }}</p>
+                    <p class="text-sm text-gray-400 dark:text-gray-500">{{ __('Start learning to see your progress here') }}</p>
                 </div>
             @endforelse
         </div>
@@ -84,7 +84,7 @@
             <div class="mt-4 text-center">
                 <a href="{{ route('filament.admin.resources.exercise-attempts.index') }}"
                    class="text-sm font-medium text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 inline-flex items-center gap-1">
-                    View All Activity
+                    {{ __('View All Activity') }}
                     <x-heroicon-m-arrow-right class="w-4 h-4" />
                 </a>
             </div>
