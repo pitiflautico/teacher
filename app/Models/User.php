@@ -180,4 +180,25 @@ class User extends Authenticatable
             ->where('is_active', true)
             ->first();
     }
+
+    // Exercises & Learning
+    public function exercises(): HasMany
+    {
+        return $this->hasMany(Exercise::class);
+    }
+
+    public function exerciseAttempts(): HasMany
+    {
+        return $this->hasMany(ExerciseAttempt::class);
+    }
+
+    public function flashcards(): HasMany
+    {
+        return $this->hasMany(Flashcard::class);
+    }
+
+    public function flashcardReviews(): HasMany
+    {
+        return $this->hasMany(FlashcardReview::class);
+    }
 }
