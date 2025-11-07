@@ -1,24 +1,51 @@
-*.log
+# macOS
+
 .DS_Store
+
+# Entorno y configuración local
+
 .env
-.env.backup
-.env.production
-.phpactor.json
+.env.*
 .phpunit.result.cache
-/.fleet
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/auth.json
-/node_modules
-/public/build
+
+# Dependencias y compilados
+
+/node_modules/
+/vendor/
+/bootstrap/cache/
+/storage/
+/public/build/
 /public/hot
-/public/storage
+
+# Logs y cachés
+
 /storage/*.key
-/storage/pail
-/vendor
-Homestead.json
-Homestead.yaml
-Thumbs.db
+/storage/logs
+/storage/framework/cache
+/storage/framework/sessions
+/storage/framework/views
+
+# IDEs y editores
+
+/.idea/
+/.vscode/
+/*.code-workspace
+
+# Herd, Valet, Laravel
+
+/.herd/
+/valet
+
+# Otros archivos locales o temporales
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+composer.lock
+package-lock.json
+
+# Mantener solo este directorio
+
+!styles_design_inspiration/
+
+
