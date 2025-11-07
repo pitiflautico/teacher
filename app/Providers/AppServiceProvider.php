@@ -19,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Register observers for gamification
+        \App\Models\ExerciseAttempt::observe(\App\Observers\ExerciseAttemptObserver::class);
+        \App\Models\FlashcardReview::observe(\App\Observers\FlashcardReviewObserver::class);
     }
 }
