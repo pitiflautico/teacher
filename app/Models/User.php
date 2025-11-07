@@ -133,4 +133,36 @@ class User extends Authenticatable
     {
         $this->following()->detach($user->id);
     }
+
+    // Gamification
+    public function badges()
+    {
+        return $this->belongsToMany(Badge::class, 'user_badges')
+            ->withPivot('unlocked_at')
+            ->withTimestamps();
+    }
+
+    public function points(): HasMany
+    {
+        return $this->hasMany(Point::class);
+    }
+
+    public function totalPoints(): int
+    {
+        return $this->points()->sum('points');
+    }
+
+    public function level(): int
+    {
+        $points = $this->totalPoints();
+        return (int) floor($points / 1000) + 1; // 1000 points = 1 level
+    }
+
+    public function pointsToNextLevel(): int
+    {
+        $currentLevel = $this->level();
+        $pointsForNextLevel = $currentLevel * 1000;
+        $currentPoints = $this->totalPoints();
+        return $pointsForNextLevel - $currentPoints;
+    }
 }
