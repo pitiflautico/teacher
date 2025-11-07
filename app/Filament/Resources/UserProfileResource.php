@@ -64,14 +64,33 @@ class UserProfileResource extends Resource
                     ])->columns(2),
 
                 Forms\Components\Section::make('AI Preferences')
+                    ->description('Choose your preferred AI provider for content generation. Each provider has different models, pricing, and capabilities.')
                     ->schema([
                         Forms\Components\Select::make('preferred_ai_provider')
+                            ->label('Preferred AI Provider')
                             ->options([
-                                'openai' => 'OpenAI (GPT-4o-mini)',
-                                'replicate' => 'Replicate (Llama 2)',
-                                'together' => 'Together.ai (Llama 3.1)',
+                                'openai' => 'OpenAI (GPT-4o-mini) - Fastest & Most Accurate',
+                                'together' => 'Together.ai (Llama 3.1) - Cost-Effective & Fast',
+                                'replicate' => 'Replicate (Llama 2) - Open Source & Flexible',
                             ])
-                            ->default('openai'),
+                            ->default('openai')
+                            ->helperText('Your selected provider will be used for exercise generation, flashcard creation, and AI explanations.')
+                            ->columnSpanFull(),
+                        Forms\Components\Placeholder::make('provider_info')
+                            ->label('Provider Information')
+                            ->content(function () {
+                                $info = "**Available Providers:**\n\n";
+                                $info .= "• **OpenAI**: Best quality, $0.15-$0.60 per 1M tokens\n";
+                                $info .= "• **Together.ai**: Fast & affordable, $0.18-$0.88 per 1M tokens\n";
+                                $info .= "• **Replicate**: Pay per second, $0.65-$2.75 per 1M tokens\n\n";
+                                $info .= "You can change providers anytime to compare results.";
+                                return new \Illuminate\Support\HtmlString(
+                                    '<div class="text-sm text-gray-600 dark:text-gray-400">' .
+                                    nl2br($info) .
+                                    '</div>'
+                                );
+                            })
+                            ->columnSpanFull(),
                         Forms\Components\Select::make('ai_tone')
                             ->options([
                                 'formal' => 'Formal',

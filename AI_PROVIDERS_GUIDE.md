@@ -13,7 +13,7 @@ The Teacher Platform supports **3 AI providers** for different tasks:
 
 ### Why Together.ai?
 - ✅ **Fast inference** (optimized for production)
-- ✅ **Cost-effective** ($0.20-$0.90 per 1M tokens)
+- ✅ **Cost-effective** ($0.18-$3.50 per 1M tokens)
 - ✅ **100+ open-source models** (Llama, Mixtral, Qwen, etc.)
 - ✅ **OpenAI-compatible API** (easy migration)
 - ✅ **No cold starts** (always ready)
@@ -57,7 +57,7 @@ Use for: Exercise generation, explanations, summaries
 ```
 Model ID: meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo
 Context: 8,192 tokens
-Cost: $0.20 per 1M input, $0.20 per 1M output
+Cost: $0.18 per 1M input, $0.18 per 1M output (✅ Verified from official pricing)
 Use for: Simple Q&A, flashcard generation, quick responses
 ```
 
@@ -275,7 +275,8 @@ REPLICATE_MODEL=meta/llama-2-70b-chat
 **1. Llama 2 70B Chat** (Great for conversations)
 ```
 Model: meta/llama-2-70b-chat
-Version: latest
+Version: latest or 02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3
+Cost: $0.65 per 1M input, $2.75 per 1M output (or $0.0056/second) - ✅ Verified
 Use for: Q&A, explanations, tutoring
 ```
 
@@ -484,7 +485,7 @@ The platform already has OpenAI configured. See existing implementation in:
 | Feature | Together.ai | Replicate | OpenAI |
 |---------|------------|-----------|--------|
 | **Speed** | ⚡⚡⚡ Very Fast | ⚡⚡ Fast | ⚡⚡ Fast |
-| **Cost** | 💰 $0.20-$0.90/1M | 💰💰 Pay per second | 💰💰💰 $0.15-$5/1M |
+| **Cost** | 💰 $0.18-$3.50/1M | 💰💰 $0.65-$2.75/1M or per-second | 💰💰💰 $0.15-$5/1M |
 | **Models** | 100+ open-source | 1000+ models | GPT-3.5, GPT-4 |
 | **Ease of Use** | ⭐⭐⭐⭐⭐ OpenAI compatible | ⭐⭐⭐⭐ Simple API | ⭐⭐⭐⭐⭐ Best docs |
 | **Quality** | ⭐⭐⭐⭐ Excellent | ⭐⭐⭐⭐ Excellent | ⭐⭐⭐⭐⭐ Best |

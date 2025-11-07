@@ -26,10 +26,16 @@ class ExerciseGenerator
 
         $prompt = $this->buildPrompt($context, $type, $difficulty, $count);
 
+        // Get user's preferred AI provider
+        $provider = $material->user->profile?->preferred_ai_provider ?? config('ai.default', 'openai');
+
         $response = $this->aiManager->chat([
             ['role' => 'system', 'content' => 'You are an expert educational content creator. Generate high-quality exercises in JSON format.'],
             ['role' => 'user', 'content' => $prompt]
-        ], ['max_tokens' => 2000]);
+        ], [
+            'max_tokens' => 2000,
+            'provider' => $provider
+        ]);
 
         $exercises = $this->parseExercises($response->getContent(), $material, $type, $difficulty);
 
@@ -147,7 +153,7 @@ PROMPT;
                     'hints' => $item['hints'] ?? null,
                     'contains_math' => $item['contains_math'] ?? false,
                     'ai_metadata' => [
-                        'provider' => 'ai_generated',
+                        'provider' => $material->user->profile?->preferred_ai_provider ?? config('ai.default', 'openai'),
                         'generated_at' => now()->toIso8601String(),
                     ],
                 ]);
