@@ -14,6 +14,7 @@ class Dashboard extends BaseDashboard
     {
         return [
             \App\Filament\Widgets\WelcomeWidget::class,
+            \App\Filament\Widgets\QuickActionsWidget::class,
             \App\Filament\Widgets\StatsOverviewWidget::class,
             \App\Filament\Widgets\LearningProgressWidget::class,
             \App\Filament\Widgets\RecentActivityWidget::class,

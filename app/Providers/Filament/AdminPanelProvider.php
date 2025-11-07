@@ -11,6 +11,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
+use Filament\SpatieLaravelTranslatablePlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -28,11 +29,38 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->colors([
-                'primary' => Color::Green,
+                'primary' => [
+                    50 => '#F5F3FF',
+                    100 => '#EDE9FE',
+                    200 => '#DDD6FE',
+                    300 => '#C4B5FD',
+                    400 => '#A78BFA',
+                    500 => '#8B5CF6',
+                    600 => '#7C3AED',
+                    700 => '#6D28D9',
+                    800 => '#5B21B6',
+                    900 => '#4C1D95',
+                    950 => '#2E1065',
+                ],
             ])
             ->brandName('Teacher Platform')
+            ->brandLogo(asset('images/logo.svg'))
+            ->favicon(asset('images/favicon.png'))
             ->databaseNotifications()
             ->darkMode(true)
+            ->sidebarCollapsibleOnDesktop()
+            ->navigationGroups([
+                'Quick Actions',
+                'Learning',
+                'Content',
+                'Social',
+                'Planning',
+                'System',
+            ])
+            ->plugins([
+                SpatieLaravelTranslatablePlugin::make()
+                    ->defaultLocales(['en', 'es']),
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
