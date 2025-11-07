@@ -166,4 +166,18 @@ class User extends Authenticatable
         $currentPoints = $this->totalPoints();
         return $pointsForNextLevel - $currentPoints;
     }
+
+    // AI Providers
+    public function aiProviders(): HasMany
+    {
+        return $this->hasMany(UserAiProvider::class);
+    }
+
+    public function getActiveAiProvider(string $provider): ?UserAiProvider
+    {
+        return $this->aiProviders()
+            ->where('provider', $provider)
+            ->where('is_active', true)
+            ->first();
+    }
 }

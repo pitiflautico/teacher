@@ -8,15 +8,20 @@ use App\Services\AI\Providers\OpenAIProvider;
 use App\Services\AI\Providers\ReplicateProvider;
 use App\Services\AI\Providers\TogetherProvider;
 use App\Models\TokenUsage;
+use App\Models\User;
+use App\Models\UserAiProvider;
 use Illuminate\Support\Facades\Log;
 
 class AIManager
 {
     private array $providers = [];
     private ?AIProviderInterface $currentProvider = null;
+    private ?User $user = null;
+    private ?UserAiProvider $userProvider = null;
 
-    public function __construct()
+    public function __construct(?User $user = null)
     {
+        $this->user = $user ?? auth()->user();
         $this->registerProviders();
         $this->setDefaultProvider();
     }
@@ -27,6 +32,11 @@ class AIManager
     public function complete(string $prompt, array $options = []): AIResponse
     {
         $provider = $this->getProvider($options['provider'] ?? null);
+
+        // Check user limits if user provider is configured
+        if ($this->userProvider && !$this->userProvider->canUse()) {
+            throw new \RuntimeException('Usage limit reached for this provider. Please check your limits in AI Provider Settings.');
+        }
 
         try {
             $response = $provider->complete($prompt, $options);
@@ -50,6 +60,11 @@ class AIManager
     public function chat(array $messages, array $options = []): AIResponse
     {
         $provider = $this->getProvider($options['provider'] ?? null);
+
+        // Check user limits if user provider is configured
+        if ($this->userProvider && !$this->userProvider->canUse()) {
+            throw new \RuntimeException('Usage limit reached for this provider. Please check your limits in AI Provider Settings.');
+        }
 
         try {
             $response = $provider->chat($messages, $options);
@@ -77,6 +92,12 @@ class AIManager
         }
 
         $this->currentProvider = $this->providers[$name];
+
+        // Set user provider if user is authenticated
+        if ($this->user) {
+            $this->userProvider = $this->user->getActiveAiProvider($name);
+        }
+
         return $this;
     }
 
@@ -136,22 +157,53 @@ class AIManager
      */
     private function registerProviders(): void
     {
-        try {
-            $this->providers['openai'] = new OpenAIProvider();
-        } catch (\Exception $e) {
-            Log::warning('OpenAI provider not available: ' . $e->getMessage());
+        // If user is authenticated, try to load user-specific providers first
+        if ($this->user) {
+            $userProviders = $this->user->aiProviders()
+                ->where('is_active', true)
+                ->get();
+
+            foreach ($userProviders as $userProvider) {
+                try {
+                    $userProvider->resetUsageIfNeeded();
+
+                    $provider = match($userProvider->provider) {
+                        'openai' => new OpenAIProvider($userProvider->api_key),
+                        'replicate' => new ReplicateProvider($userProvider->api_key),
+                        'together' => new TogetherProvider($userProvider->api_key),
+                        'anthropic' => new OpenAIProvider($userProvider->api_key), // Anthropic uses same interface
+                        'google' => new OpenAIProvider($userProvider->api_key), // Google uses same interface
+                        default => null,
+                    };
+
+                    if ($provider) {
+                        $this->providers[$userProvider->provider] = $provider;
+                    }
+                } catch (\Exception $e) {
+                    Log::warning("User provider {$userProvider->provider} not available: " . $e->getMessage());
+                }
+            }
         }
 
-        try {
-            $this->providers['replicate'] = new ReplicateProvider();
-        } catch (\Exception $e) {
-            Log::warning('Replicate provider not available: ' . $e->getMessage());
-        }
+        // Fallback to global config if no user providers or user not authenticated
+        if (empty($this->providers)) {
+            try {
+                $this->providers['openai'] = new OpenAIProvider();
+            } catch (\Exception $e) {
+                Log::warning('OpenAI provider not available: ' . $e->getMessage());
+            }
 
-        try {
-            $this->providers['together'] = new TogetherProvider();
-        } catch (\Exception $e) {
-            Log::warning('Together provider not available: ' . $e->getMessage());
+            try {
+                $this->providers['replicate'] = new ReplicateProvider();
+            } catch (\Exception $e) {
+                Log::warning('Replicate provider not available: ' . $e->getMessage());
+            }
+
+            try {
+                $this->providers['together'] = new TogetherProvider();
+            } catch (\Exception $e) {
+                Log::warning('Together provider not available: ' . $e->getMessage());
+            }
         }
     }
 
@@ -164,11 +216,24 @@ class AIManager
 
         if (isset($this->providers[$defaultProvider])) {
             $this->currentProvider = $this->providers[$defaultProvider];
+
+            // Set user provider if user is authenticated
+            if ($this->user) {
+                $this->userProvider = $this->user->getActiveAiProvider($defaultProvider);
+            }
         } else {
             // Fallback to first available provider
             $available = $this->getAvailableProviders();
             if (!empty($available)) {
                 $this->currentProvider = reset($available);
+
+                // Try to set user provider for first available
+                if ($this->user) {
+                    $providerName = array_search($this->currentProvider, $this->providers);
+                    if ($providerName) {
+                        $this->userProvider = $this->user->getActiveAiProvider($providerName);
+                    }
+                }
             }
         }
     }
@@ -199,8 +264,9 @@ class AIManager
         }
 
         try {
+            // Track in global token usage table
             TokenUsage::create([
-                'user_id' => auth()->id(),
+                'user_id' => $this->user?->id ?? auth()->id(),
                 'provider' => $response->provider,
                 'model' => $response->metadata['model'] ?? 'unknown',
                 'type' => $type,
@@ -211,6 +277,14 @@ class AIManager
                 'input_preview' => substr($input, 0, 255),
                 'output_preview' => substr($response->content, 0, 255),
             ]);
+
+            // Track in user provider if applicable
+            if ($this->userProvider) {
+                $this->userProvider->trackUsage(
+                    $response->totalTokens,
+                    $response->cost
+                );
+            }
         } catch (\Exception $e) {
             Log::error('Failed to track token usage', ['error' => $e->getMessage()]);
         }

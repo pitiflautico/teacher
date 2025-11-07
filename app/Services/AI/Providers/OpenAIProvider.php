@@ -14,9 +14,10 @@ class OpenAIProvider implements AIProviderInterface
     private $temperature;
     private $lastTokenUsage = [];
 
-    public function __construct()
+    public function __construct(?string $apiKey = null)
     {
-        $apiKey = config('ai.providers.openai.api_key');
+        // Use provided API key or fall back to config
+        $apiKey = $apiKey ?? config('ai.providers.openai.api_key');
 
         if (!$apiKey) {
             throw new \Exception('OpenAI API key not configured');
