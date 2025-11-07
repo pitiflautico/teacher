@@ -22,7 +22,7 @@ class MaterialFactory extends Factory
             'topic_id' => \App\Models\Topic::factory(),
             'title' => fake()->sentence(),
             'description' => fake()->paragraph(),
-            'type' => fake()->randomElement(['pdf', 'image', 'video', 'text', 'url']),
+            'type' => fake()->randomElement(['document', 'image', 'pdf', 'link', 'note']),
             'file_path' => fake()->optional()->filePath(),
             'original_filename' => fake()->optional()->word() . '.pdf',
             'mime_type' => fake()->optional()->mimeType(),

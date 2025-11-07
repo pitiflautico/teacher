@@ -31,7 +31,7 @@ class SubjectFactory extends Factory
                 'Economics',
             ]),
             'description' => fake()->paragraph(),
-            'color' => fake()->optional()->hexColor(),
+            'color' => fake()->hexColor(),
             'icon' => fake()->optional()->word(),
         ];
     }
