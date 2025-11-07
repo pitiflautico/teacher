@@ -83,6 +83,8 @@ class ManageAiProviders extends Page implements HasTable
                                 'openai' => 'OpenAI (GPT-4, GPT-3.5)',
                                 'anthropic' => 'Anthropic (Claude)',
                                 'google' => 'Google (Gemini)',
+                                'replicate' => 'Replicate (Llama, etc.)',
+                                'together' => 'Together AI (Llama 3.1)',
                             ])
                             ->required()
                             ->unique('user_ai_providers', 'provider', modifyRuleUsing: function ($rule) {
@@ -208,6 +210,8 @@ class ManageAiProviders extends Page implements HasTable
                                 'openai' => 'OpenAI (GPT-4, GPT-3.5)',
                                 'anthropic' => 'Anthropic (Claude)',
                                 'google' => 'Google (Gemini)',
+                                'replicate' => 'Replicate (Llama, etc.)',
+                                'together' => 'Together AI (Llama 3.1)',
                             ])
                             ->required()
                             ->helperText(__('Choose the AI provider you want to use')),

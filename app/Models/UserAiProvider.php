@@ -100,6 +100,8 @@ class UserAiProvider extends Model
             'openai' => 'OpenAI (GPT)',
             'anthropic' => 'Anthropic (Claude)',
             'google' => 'Google (Gemini)',
+            'replicate' => 'Replicate (Llama)',
+            'together' => 'Together AI (Llama 3.1)',
             default => ucfirst($this->provider),
         };
     }

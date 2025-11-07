@@ -58,6 +58,8 @@
                         <li><strong>OpenAI:</strong> <a href="https://platform.openai.com/api-keys" target="_blank" class="underline hover:no-underline">platform.openai.com/api-keys</a></li>
                         <li><strong>Anthropic (Claude):</strong> <a href="https://console.anthropic.com/settings/keys" target="_blank" class="underline hover:no-underline">console.anthropic.com/settings/keys</a></li>
                         <li><strong>Google (Gemini):</strong> <a href="https://makersuite.google.com/app/apikey" target="_blank" class="underline hover:no-underline">makersuite.google.com/app/apikey</a></li>
+                        <li><strong>Replicate:</strong> <a href="https://replicate.com/account/api-tokens" target="_blank" class="underline hover:no-underline">replicate.com/account/api-tokens</a></li>
+                        <li><strong>Together AI:</strong> <a href="https://api.together.xyz/settings/api-keys" target="_blank" class="underline hover:no-underline">api.together.xyz/settings/api-keys</a></li>
                     </ul>
                 </div>
             </div>
