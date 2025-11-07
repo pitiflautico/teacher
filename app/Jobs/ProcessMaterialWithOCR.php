@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Material;
+use App\Notifications\MaterialProcessedNotification;
 use App\Services\OCR\OCRManager;
 use App\Services\AI\AIManager;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -82,6 +83,9 @@ class ProcessMaterialWithOCR implements ShouldQueue
                     'text_length' => strlen($ocrResponse->getText()),
                     'confidence' => $ocrResponse->getConfidence(),
                 ]);
+
+                // Send success notification
+                $this->material->user->notify(new MaterialProcessedNotification($this->material, true));
             }
         } catch (\Exception $e) {
             Log::error('Material processing failed', [
@@ -89,6 +93,11 @@ class ProcessMaterialWithOCR implements ShouldQueue
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
+            // Send failure notification
+            $this->material->user->notify(
+                new MaterialProcessedNotification($this->material, false, $e->getMessage())
+            );
 
             throw $e;
         }
