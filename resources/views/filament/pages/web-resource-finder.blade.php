@@ -69,13 +69,15 @@
                                 <div class="flex items-start justify-between mb-3">
                                     <div class="flex items-start gap-3 flex-1">
                                         <!-- Type Icon -->
-                                        <div class="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center
-                                            {{ match($result['type']) {
+                                        @php
+                                            $iconBgClass = match($result['type']) {
                                                 'pdf' => 'bg-red-100 dark:bg-red-900/30',
                                                 'video' => 'bg-blue-100 dark:bg-blue-900/30',
                                                 'exercise' => 'bg-green-100 dark:bg-green-900/30',
                                                 default => 'bg-gray-100 dark:bg-gray-700'
-                                            }}}">
+                                            };
+                                        @endphp
+                                        <div class="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center {{ $iconBgClass }}">
                                             @if($result['type'] === 'pdf')
                                                 <x-heroicon-o-document-text class="w-6 h-6 text-red-600 dark:text-red-400" />
                                             @elseif($result['type'] === 'video')
@@ -129,15 +131,16 @@
 
                                     <!-- AI Relevance Score -->
                                     @if(!empty($result['relevance']) && $result['relevance'] > 0)
+                                        @php
+                                            $scoreColorClass = $result['relevance'] >= 80
+                                                ? 'text-green-600 dark:text-green-400'
+                                                : ($result['relevance'] >= 60
+                                                    ? 'text-blue-600 dark:text-blue-400'
+                                                    : 'text-gray-600 dark:text-gray-400');
+                                        @endphp
                                         <div class="flex items-center gap-1.5 shrink-0">
                                             <x-heroicon-m-sparkles class="w-4 h-4 text-purple-500" />
-                                            <span class="text-sm font-semibold
-                                                {{ $result['relevance'] >= 80
-                                                    ? 'text-green-600 dark:text-green-400'
-                                                    : ($result['relevance'] >= 60
-                                                        ? 'text-blue-600 dark:text-blue-400'
-                                                        : 'text-gray-600 dark:text-gray-400')
-                                                }}">
+                                            <span class="text-sm font-semibold {{ $scoreColorClass }}">
                                                 {{ $result['relevance'] }}%
                                             </span>
                                         </div>
