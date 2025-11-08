@@ -88,8 +88,21 @@ class WebResourceFinder extends Page
 
                                 Forms\Components\Toggle::make('use_ai')
                                     ->label(__('Use AI to filter results'))
-                                    ->helperText(__('AI will analyze and rank results by quality'))
-                                    ->default(true),
+                                    ->helperText(function () {
+                                        $aiManager = app(\App\Services\AI\AIManager::class);
+                                        if (!$aiManager->hasAvailableProvider()) {
+                                            return __('Configure an AI provider in Settings → AI Providers to enable AI filtering');
+                                        }
+                                        return __('AI will analyze and rank results by quality');
+                                    })
+                                    ->default(function () {
+                                        $aiManager = app(\App\Services\AI\AIManager::class);
+                                        return $aiManager->hasAvailableProvider();
+                                    })
+                                    ->disabled(function () {
+                                        $aiManager = app(\App\Services\AI\AIManager::class);
+                                        return !$aiManager->hasAvailableProvider();
+                                    }),
                             ]),
                     ]),
             ])

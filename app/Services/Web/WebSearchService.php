@@ -30,6 +30,18 @@ class WebSearchService
     public function search(string $query, int $limit = 10, bool $useAI = true): array
     {
         try {
+            // Check cache first (cache for 1 hour to avoid rate limiting)
+            $cacheKey = 'web_search:' . md5($query . $limit . $useAI);
+            $cached = cache()->get($cacheKey);
+
+            if ($cached) {
+                Log::info('Returning cached search results', ['query' => $query]);
+                return $cached;
+            }
+
+            // Add small delay to avoid rate limiting
+            usleep(500000); // 0.5 seconds
+
             // Search using HTML scraping for better results
             $results = $this->searchWithHtmlScraping($query, $limit * 2);
 
@@ -38,7 +50,12 @@ class WebSearchService
                 $results = $this->filterWithAI($results, $query);
             }
 
-            return array_slice($results, 0, $limit);
+            $finalResults = array_slice($results, 0, $limit);
+
+            // Cache results for 1 hour
+            cache()->put($cacheKey, $finalResults, 3600);
+
+            return $finalResults;
 
         } catch (\Exception $e) {
             Log::error('Web search failed', [
@@ -144,6 +161,16 @@ class WebSearchService
     private function filterWithAI(array $results, string $query): array
     {
         try {
+            // Check if AI provider is available
+            if (!$this->aiManager->hasAvailableProvider()) {
+                Log::info('Skipping AI filtering - no provider available');
+                // Return results without AI filtering, but assign basic relevance scores
+                foreach ($results as &$result) {
+                    $result['relevance'] = 70; // Default score
+                }
+                return $results;
+            }
+
             $resultsText = '';
             foreach ($results as $i => $r) {
                 $resultsText .= sprintf("%d. %s\nURL: %s\nSnippet: %s\n\n",
@@ -182,6 +209,12 @@ PROMPT;
 
         } catch (\Exception $e) {
             Log::error('AI filtering failed', ['error' => $e->getMessage()]);
+            // Return all results with basic scoring on error
+            foreach ($results as &$result) {
+                if (!isset($result['relevance']) || $result['relevance'] === 0) {
+                    $result['relevance'] = 70;
+                }
+            }
             return $results;
         }
     }

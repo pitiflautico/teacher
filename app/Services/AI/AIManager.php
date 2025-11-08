@@ -239,6 +239,14 @@ class AIManager
     }
 
     /**
+     * Check if there's an available AI provider
+     */
+    public function hasAvailableProvider(): bool
+    {
+        return $this->currentProvider !== null;
+    }
+
+    /**
      * Get provider instance
      */
     private function getProvider(?string $name = null): AIProviderInterface
