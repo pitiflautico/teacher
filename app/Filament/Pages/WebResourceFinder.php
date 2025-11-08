@@ -175,13 +175,40 @@ class WebResourceFinder extends Page
             return;
         }
 
-        // TODO: Implement saving selected resources to database
-        // For now, just show success message
+        $saved = 0;
+        $data = $this->form->getState();
+        $subjectId = $data['subject_id'] ?? null;
+
+        foreach ($this->selected as $index) {
+            if (isset($this->results[$index])) {
+                $resource = $this->results[$index];
+
+                // Check if already saved to avoid duplicates
+                $exists = \App\Models\SavedResource::where('user_id', auth()->id())
+                    ->where('url', $resource['url'])
+                    ->exists();
+
+                if (!$exists) {
+                    \App\Models\SavedResource::create([
+                        'user_id' => auth()->id(),
+                        'subject_id' => $subjectId,
+                        'title' => $resource['title'],
+                        'url' => $resource['url'],
+                        'snippet' => $resource['snippet'] ?? null,
+                        'type' => $resource['type'],
+                        'relevance' => $resource['relevance'] ?? 0,
+                        'ai_reason' => $resource['ai_reason'] ?? null,
+                        'source' => 'web_search',
+                    ]);
+                    $saved++;
+                }
+            }
+        }
 
         Notification::make()
             ->success()
             ->title(__('Resources saved'))
-            ->body(__('Selected resources have been saved to your library'))
+            ->body(__(':count resources saved to your library', ['count' => $saved]))
             ->send();
 
         $this->selected = [];
