@@ -39,9 +39,9 @@
     </div>
 
     <!-- Stats grid with clean white cards -->
-    <div class="grid grid-cols-4 gap-4 mt-4">
+    <div class="flex flex-wrap gap-4 mt-4">
         <!-- Total Points -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-700">
+        <div class="flex-1 min-w-[200px] bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('Points') }}</span>
                 <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center">
@@ -52,7 +52,7 @@
         </div>
 
         <!-- Subjects -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-700">
+        <div class="flex-1 min-w-[200px] bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('Subjects') }}</span>
                 <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
@@ -63,7 +63,7 @@
         </div>
 
         <!-- Exercises Completed -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-700">
+        <div class="flex-1 min-w-[200px] bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('Completed') }}</span>
                 <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
@@ -74,7 +74,7 @@
         </div>
 
         <!-- Study Streak -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-700">
+        <div class="flex-1 min-w-[200px] bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('Streak') }}</span>
                 <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
