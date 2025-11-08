@@ -173,6 +173,11 @@ class User extends Authenticatable
         return $this->hasMany(UserAiProvider::class);
     }
 
+    public function savedResources(): HasMany
+    {
+        return $this->hasMany(SavedResource::class);
+    }
+
     public function getActiveAiProvider(string $provider): ?UserAiProvider
     {
         return $this->aiProviders()
