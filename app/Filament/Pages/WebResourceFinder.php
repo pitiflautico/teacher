@@ -1,0 +1,216 @@
+<?php
+
+namespace App\Filament\Pages;
+
+use App\Models\Subject;
+use App\Services\Web\WebSearchService;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Livewire\Attributes\Computed;
+
+class WebResourceFinder extends Page
+{
+    protected static ?string $navigationIcon = 'heroicon-o-magnifying-glass';
+
+    protected static string $view = 'filament.pages.web-resource-finder';
+
+    protected static ?string $navigationLabel = 'Find Resources Online';
+
+    protected static ?string $title = 'Find Educational Resources';
+
+    protected static ?string $navigationGroup = 'Content';
+
+    protected static ?int $navigationSort = 20;
+
+    // Form data
+    public ?array $data = [];
+
+    // Search results
+    public array $results = [];
+
+    // Selected resources to save
+    public array $selected = [];
+
+    // Loading state
+    public bool $searching = false;
+
+    public function mount(): void
+    {
+        $this->form->fill();
+    }
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Section::make(__('Search for Educational Resources'))
+                    ->description(__('Find exercises, PDFs, videos, and study materials from the web'))
+                    ->schema([
+                        Forms\Components\Grid::make(3)
+                            ->schema([
+                                Forms\Components\TextInput::make('query')
+                                    ->label(__('Search Topic'))
+                                    ->placeholder(__('e.g., quadratic equations, photosynthesis'))
+                                    ->required()
+                                    ->columnSpan(2),
+
+                                Forms\Components\Select::make('subject_id')
+                                    ->label(__('Subject'))
+                                    ->options(Subject::pluck('name', 'id'))
+                                    ->searchable()
+                                    ->preload(),
+                            ]),
+
+                        Forms\Components\Grid::make(3)
+                            ->schema([
+                                Forms\Components\Select::make('resource_type')
+                                    ->label(__('Resource Type'))
+                                    ->options([
+                                        'all' => __('All Types'),
+                                        'exercises' => __('Exercises & Worksheets'),
+                                        'pdfs' => __('PDFs & Documents'),
+                                        'videos' => __('Videos & Tutorials'),
+                                    ])
+                                    ->default('all')
+                                    ->required(),
+
+                                Forms\Components\Select::make('level')
+                                    ->label(__('Level'))
+                                    ->options([
+                                        'elementary' => __('Elementary'),
+                                        'middle' => __('Middle School'),
+                                        'high' => __('High School'),
+                                        'university' => __('University'),
+                                    ])
+                                    ->placeholder(__('Any level')),
+
+                                Forms\Components\Toggle::make('use_ai')
+                                    ->label(__('Use AI to filter results'))
+                                    ->helperText(function () {
+                                        $aiManager = app(\App\Services\AI\AIManager::class);
+                                        if (!$aiManager->hasAvailableProvider()) {
+                                            return __('Configure an AI provider in Settings → AI Providers to enable AI filtering');
+                                        }
+                                        return __('AI will analyze and rank results by quality');
+                                    })
+                                    ->default(function () {
+                                        $aiManager = app(\App\Services\AI\AIManager::class);
+                                        return $aiManager->hasAvailableProvider();
+                                    })
+                                    ->disabled(function () {
+                                        $aiManager = app(\App\Services\AI\AIManager::class);
+                                        return !$aiManager->hasAvailableProvider();
+                                    }),
+                            ]),
+                    ]),
+            ])
+            ->statePath('data');
+    }
+
+    public function search(): void
+    {
+        $data = $this->form->getState();
+
+        $this->validate();
+
+        $this->searching = true;
+        $this->results = [];
+
+        try {
+            $webSearch = app(WebSearchService::class);
+
+            $subject = isset($data['subject_id'])
+                ? Subject::find($data['subject_id'])?->name
+                : '';
+
+            $this->results = $webSearch->searchEducationalResources(
+                topic: $data['query'],
+                subject: $subject,
+                type: $data['resource_type'] ?? 'all'
+            );
+
+            if (empty($this->results)) {
+                Notification::make()
+                    ->warning()
+                    ->title(__('No results found'))
+                    ->body(__('Try different keywords or disable AI filtering'))
+                    ->send();
+            } else {
+                Notification::make()
+                    ->success()
+                    ->title(__('Found :count resources', ['count' => count($this->results)]))
+                    ->send();
+            }
+
+        } catch (\Exception $e) {
+            Notification::make()
+                ->danger()
+                ->title(__('Search failed'))
+                ->body($e->getMessage())
+                ->send();
+        }
+
+        $this->searching = false;
+    }
+
+    public function toggleSelect(int $index): void
+    {
+        if (in_array($index, $this->selected)) {
+            $this->selected = array_diff($this->selected, [$index]);
+        } else {
+            $this->selected[] = $index;
+        }
+    }
+
+    public function saveSelected(): void
+    {
+        if (empty($this->selected)) {
+            Notification::make()
+                ->warning()
+                ->title(__('No resources selected'))
+                ->body(__('Please select at least one resource to save'))
+                ->send();
+            return;
+        }
+
+        $saved = 0;
+        $data = $this->form->getState();
+        $subjectId = $data['subject_id'] ?? null;
+
+        foreach ($this->selected as $index) {
+            if (isset($this->results[$index])) {
+                $resource = $this->results[$index];
+
+                // Check if already saved to avoid duplicates
+                $exists = \App\Models\SavedResource::where('user_id', auth()->id())
+                    ->where('url', $resource['url'])
+                    ->exists();
+
+                if (!$exists) {
+                    \App\Models\SavedResource::create([
+                        'user_id' => auth()->id(),
+                        'subject_id' => $subjectId,
+                        'title' => $resource['title'],
+                        'url' => $resource['url'],
+                        'snippet' => $resource['snippet'] ?? null,
+                        'type' => $resource['type'],
+                        'relevance' => $resource['relevance'] ?? 0,
+                        'ai_reason' => $resource['ai_reason'] ?? null,
+                        'source' => 'web_search',
+                    ]);
+                    $saved++;
+                }
+            }
+        }
+
+        Notification::make()
+            ->success()
+            ->title(__('Resources saved'))
+            ->body(__(':count resources saved to your library', ['count' => $saved]))
+            ->send();
+
+        $this->selected = [];
+    }
+}

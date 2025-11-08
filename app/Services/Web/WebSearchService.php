@@ -2,15 +2,18 @@
 
 namespace App\Services\Web;
 
+use App\Services\AI\AIManager;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class WebSearchService
 {
     private Client $client;
     private ?string $apiKey;
+    private AIManager $aiManager;
 
-    public function __construct()
+    public function __construct(AIManager $aiManager)
     {
         $this->client = new Client([
             'timeout' => 30,
@@ -18,43 +21,42 @@ class WebSearchService
         ]);
 
         $this->apiKey = config('services.search.api_key');
+        $this->aiManager = $aiManager;
     }
 
     /**
-     * Search for educational content
+     * Search for educational content with AI filtering
      */
-    public function search(string $query, int $limit = 10): array
+    public function search(string $query, int $limit = 10, bool $useAI = true): array
     {
         try {
-            // Using DuckDuckGo API (no API key required)
-            $response = $this->client->get('https://api.duckduckgo.com/', [
-                'query' => [
-                    'q' => $query,
-                    'format' => 'json',
-                    'no_html' => 1,
-                    't' => 'teacher_platform',
-                ]
-            ]);
+            // Check cache first (cache for 1 hour to avoid rate limiting)
+            $cacheKey = 'web_search:' . md5($query . $limit . $useAI);
+            $cached = cache()->get($cacheKey);
 
-            $data = json_decode($response->getBody()->getContents(), true);
-
-            $results = [];
-
-            // Process related topics
-            if (isset($data['RelatedTopics'])) {
-                foreach (array_slice($data['RelatedTopics'], 0, $limit) as $topic) {
-                    if (isset($topic['Text']) && isset($topic['FirstURL'])) {
-                        $results[] = [
-                            'title' => $topic['Text'],
-                            'url' => $topic['FirstURL'],
-                            'snippet' => $topic['Text'],
-                            'source' => 'duckduckgo',
-                        ];
-                    }
-                }
+            if ($cached) {
+                Log::info('Returning cached search results', ['query' => $query]);
+                return $cached;
             }
 
-            return $results;
+            // Add small delay to avoid rate limiting
+            usleep(500000); // 0.5 seconds
+
+            // Search using HTML scraping for better results
+            $results = $this->searchWithHtmlScraping($query, $limit * 2);
+
+            // Use AI to filter and rank if enabled
+            if ($useAI && !empty($results)) {
+                $results = $this->filterWithAI($results, $query);
+            }
+
+            $finalResults = array_slice($results, 0, $limit);
+
+            // Cache results for 1 hour
+            cache()->put($cacheKey, $finalResults, 3600);
+
+            return $finalResults;
+
         } catch (\Exception $e) {
             Log::error('Web search failed', [
                 'query' => $query,
@@ -62,6 +64,158 @@ class WebSearchService
             ]);
 
             return [];
+        }
+    }
+
+    /**
+     * Search using HTML scraping (more results than API)
+     */
+    private function searchWithHtmlScraping(string $query, int $limit): array
+    {
+        try {
+            $response = Http::timeout(15)
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                ])
+                ->get('https://html.duckduckgo.com/html/', [
+                    'q' => $query,
+                ]);
+
+            if (!$response->successful()) {
+                return [];
+            }
+
+            return $this->parseSearchResults($response->body(), $limit);
+
+        } catch (\Exception $e) {
+            Log::error('HTML scraping failed', ['error' => $e->getMessage()]);
+            return [];
+        }
+    }
+
+    /**
+     * Parse DuckDuckGo HTML results
+     */
+    private function parseSearchResults(string $html, int $limit): array
+    {
+        $results = [];
+
+        // Extract links
+        preg_match_all('/<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>(.*?)<\/a>/s', $html, $links);
+        preg_match_all('/<a[^>]+class="result__snippet"[^>]*>(.*?)<\/a>/s', $html, $snippets);
+
+        $count = min(count($links[1]), $limit);
+
+        for ($i = 0; $i < $count; $i++) {
+            $url = html_entity_decode($links[1][$i] ?? '');
+            $title = strip_tags($links[2][$i] ?? '');
+            $snippet = strip_tags($snippets[1][$i] ?? '');
+
+            // Clean URL
+            if (strpos($url, 'uddg=') !== false) {
+                parse_str(parse_url($url, PHP_URL_QUERY), $params);
+                $url = urldecode($params['uddg'] ?? $url);
+            }
+
+            if ($url && $title) {
+                $results[] = [
+                    'title' => $title,
+                    'url' => $url,
+                    'snippet' => $snippet,
+                    'type' => $this->detectType($url, $title),
+                    'source' => 'duckduckgo',
+                    'relevance' => 0,
+                ];
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Detect resource type
+     */
+    private function detectType(string $url, string $title): string
+    {
+        $url_lower = strtolower($url);
+        $title_lower = strtolower($title);
+
+        if (str_contains($url_lower, '.pdf') || str_contains($title_lower, 'pdf')) {
+            return 'pdf';
+        }
+
+        if (str_contains($url_lower, 'youtube') || str_contains($url_lower, 'vimeo')) {
+            return 'video';
+        }
+
+        if (str_contains($title_lower, 'exercise') || str_contains($title_lower, 'ejercicio')) {
+            return 'exercise';
+        }
+
+        return 'article';
+    }
+
+    /**
+     * Use AI to filter and rank results
+     */
+    private function filterWithAI(array $results, string $query): array
+    {
+        try {
+            // Check if AI provider is available
+            if (!$this->aiManager->hasAvailableProvider()) {
+                Log::info('Skipping AI filtering - no provider available');
+                // Return results without AI filtering, but assign basic relevance scores
+                foreach ($results as &$result) {
+                    $result['relevance'] = 70; // Default score
+                }
+                return $results;
+            }
+
+            $resultsText = '';
+            foreach ($results as $i => $r) {
+                $resultsText .= sprintf("%d. %s\nURL: %s\nSnippet: %s\n\n",
+                    $i + 1, $r['title'], $r['url'], $r['snippet']);
+            }
+
+            $prompt = <<<PROMPT
+Analyze these search results for educational query: "{$query}"
+
+Results:
+{$resultsText}
+
+Score each (0-100) for educational relevance and quality. Return JSON:
+[{"index":1,"score":85,"reason":"Good resource"},...]
+
+Only include score > 50.
+PROMPT;
+
+            $response = $this->aiManager->complete($prompt, ['temperature' => 0.3]);
+            $scores = json_decode($response->content, true);
+
+            if ($scores) {
+                foreach ($scores as $score) {
+                    $idx = ($score['index'] ?? 1) - 1;
+                    if (isset($results[$idx])) {
+                        $results[$idx]['relevance'] = $score['score'] ?? 0;
+                        $results[$idx]['ai_reason'] = $score['reason'] ?? '';
+                    }
+                }
+
+                $results = array_filter($results, fn($r) => ($r['relevance'] ?? 0) > 50);
+                usort($results, fn($a, $b) => ($b['relevance'] ?? 0) <=> ($a['relevance'] ?? 0));
+            }
+
+            return array_values($results);
+
+        } catch (\Exception $e) {
+            Log::error('AI filtering failed', ['error' => $e->getMessage()]);
+            // Return all results with basic scoring on error
+            foreach ($results as &$result) {
+                if (!isset($result['relevance']) || $result['relevance'] === 0) {
+                    $result['relevance'] = 70;
+                }
+            }
+            return $results;
         }
     }
 
@@ -91,10 +245,22 @@ class WebSearchService
     /**
      * Search for educational resources
      */
-    public function searchEducationalResources(string $topic, string $subject): array
+    public function searchEducationalResources(string $topic, string $subject, string $type = 'all'): array
     {
-        $query = "{$topic} {$subject} educational resources study material";
+        $typeTerms = match($type) {
+            'exercises' => 'ejercicios problems worksheet',
+            'pdfs' => 'PDF apuntes notes',
+            'videos' => 'video tutorial',
+            default => 'educational resources'
+        };
+
+        $query = "{$topic} {$subject} {$typeTerms}";
+
+        if ($type === 'pdfs') {
+            $query .= ' filetype:pdf';
+        }
 
         return $this->search($query, 20);
     }
 }
+

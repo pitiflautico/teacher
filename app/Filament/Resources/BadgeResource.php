@@ -65,11 +65,11 @@ class BadgeResource extends Resource
                 Tables\Columns\TextColumn::make('icon')
                     ->label('Icon')
                     ->alignCenter()
-                    ->size(Tables\Columns\TextColumn\TextColumnSize::Large),
+                    ->size('lg'),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable()
-                    ->weight(Tables\Columns\TextColumn\TextColumnWeight::Bold),
+                    ->weight('bold'),
                 Tables\Columns\TextColumn::make('slug')
                     ->searchable()
                     ->badge()

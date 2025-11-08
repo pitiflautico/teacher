@@ -166,4 +166,44 @@ class User extends Authenticatable
         $currentPoints = $this->totalPoints();
         return $pointsForNextLevel - $currentPoints;
     }
+
+    // AI Providers
+    public function aiProviders(): HasMany
+    {
+        return $this->hasMany(UserAiProvider::class);
+    }
+
+    public function savedResources(): HasMany
+    {
+        return $this->hasMany(SavedResource::class);
+    }
+
+    public function getActiveAiProvider(string $provider): ?UserAiProvider
+    {
+        return $this->aiProviders()
+            ->where('provider', $provider)
+            ->where('is_active', true)
+            ->first();
+    }
+
+    // Exercises & Learning
+    public function exercises(): HasMany
+    {
+        return $this->hasMany(Exercise::class);
+    }
+
+    public function exerciseAttempts(): HasMany
+    {
+        return $this->hasMany(ExerciseAttempt::class);
+    }
+
+    public function flashcards(): HasMany
+    {
+        return $this->hasMany(Flashcard::class);
+    }
+
+    public function flashcardReviews(): HasMany
+    {
+        return $this->hasMany(FlashcardReview::class);
+    }
 }

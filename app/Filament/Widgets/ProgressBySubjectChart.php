@@ -19,7 +19,7 @@ class ProgressBySubjectChart extends ChartWidget
         $userId = auth()->id();
 
         // Get attempts grouped by subject
-        $data = ExerciseAttempt::where('user_id', $userId)
+        $data = ExerciseAttempt::where('exercise_attempts.user_id', $userId)
             ->join('exercises', 'exercise_attempts.exercise_id', '=', 'exercises.id')
             ->join('subjects', 'exercises.subject_id', '=', 'subjects.id')
             ->select(

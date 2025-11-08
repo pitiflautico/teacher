@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('points', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->morphs('pointable'); // pointable_type, pointable_id (already indexed)
+            $table->integer('points');
+            $table->string('reason')->nullable();
             $table->timestamps();
+
+            $table->index(['user_id', 'created_at']);
         });
     }
 

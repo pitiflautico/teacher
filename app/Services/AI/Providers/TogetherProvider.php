@@ -15,9 +15,10 @@ class TogetherProvider implements AIProviderInterface
     private $temperature;
     private $lastTokenUsage = [];
 
-    public function __construct()
+    public function __construct(?string $apiKey = null)
     {
-        $this->apiKey = config('ai.providers.together.api_key');
+        // Use provided API key or fall back to config
+        $this->apiKey = $apiKey ?? config('ai.providers.together.api_key');
 
         if (!$this->apiKey) {
             throw new \Exception('Together API key not configured');
