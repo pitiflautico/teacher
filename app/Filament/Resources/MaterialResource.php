@@ -5,6 +5,9 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\MaterialResource\Pages;
 use App\Filament\Resources\MaterialResource\RelationManagers;
 use App\Jobs\GenerateExercises;
+use App\Jobs\GenerateFlashcardsFromMaterial;
+use App\Jobs\GenerateNotesFromMaterial;
+use App\Jobs\GenerateSummaryFromMaterial;
 use App\Jobs\ProcessMaterialWithOCR;
 use App\Models\Material;
 use Filament\Forms;
@@ -180,6 +183,75 @@ class MaterialResource extends Resource
                             ->title('Exercise Generation Started')
                             ->success()
                             ->body("Generating {$data['count']} {$data['difficulty']} exercises...")
+                            ->send();
+                    }),
+                Tables\Actions\Action::make('generateSummary')
+                    ->label('Generate Summary')
+                    ->icon('heroicon-o-document-text')
+                    ->color('warning')
+                    ->visible(fn (Material $record): bool =>
+                        $record->is_processed &&
+                        !empty($record->extracted_text)
+                    )
+                    ->requiresConfirmation()
+                    ->modalHeading('Generate Summary with AI')
+                    ->modalDescription(fn (Material $record) => "Generate a comprehensive summary from '{$record->title}'?")
+                    ->modalIcon('heroicon-o-sparkles')
+                    ->action(function (Material $record) {
+                        GenerateSummaryFromMaterial::dispatch($record);
+
+                        Notification::make()
+                            ->title('Summary Generation Started')
+                            ->success()
+                            ->body('Generating summary with AI...')
+                            ->send();
+                    }),
+                Tables\Actions\Action::make('generateNotes')
+                    ->label('Generate Notes')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('info')
+                    ->visible(fn (Material $record): bool =>
+                        $record->is_processed &&
+                        !empty($record->extracted_text)
+                    )
+                    ->requiresConfirmation()
+                    ->modalHeading('Generate Study Notes with AI')
+                    ->modalDescription(fn (Material $record) => "Generate structured study notes from '{$record->title}'?")
+                    ->modalIcon('heroicon-o-sparkles')
+                    ->action(function (Material $record) {
+                        GenerateNotesFromMaterial::dispatch($record);
+
+                        Notification::make()
+                            ->title('Notes Generation Started')
+                            ->success()
+                            ->body('Generating study notes with AI...')
+                            ->send();
+                    }),
+                Tables\Actions\Action::make('generateFlashcards')
+                    ->label('Generate Flashcards')
+                    ->icon('heroicon-o-light-bulb')
+                    ->color('purple')
+                    ->visible(fn (Material $record): bool =>
+                        $record->is_processed &&
+                        !empty($record->extracted_text)
+                    )
+                    ->form([
+                        Forms\Components\TextInput::make('count')
+                            ->label('Number of Flashcards')
+                            ->numeric()
+                            ->minValue(5)
+                            ->maxValue(30)
+                            ->default(10)
+                            ->required()
+                            ->helperText('How many flashcards to generate from this material'),
+                    ])
+                    ->action(function (Material $record, array $data) {
+                        GenerateFlashcardsFromMaterial::dispatch($record, $data['count']);
+
+                        Notification::make()
+                            ->title('Flashcard Generation Started')
+                            ->success()
+                            ->body("Generating {$data['count']} flashcards with AI...")
                             ->send();
                     }),
                 Tables\Actions\DeleteAction::make(),
